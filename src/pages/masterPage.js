@@ -25,11 +25,18 @@ const MICRO_INTERACTIONS = [
     { selector: 'VectorImage', inEffect: 'puff', outEffect: 'fade', duration: 180, limit: 20 }
 ];
 
+const BUTTON_FEEDBACK = {
+    limit: 20,
+    loadingLabel: 'Loading...',
+    restoreDelayMs: 700
+};
+
 $w.onReady(function () {
     runInitialRevealEnhancements();
     runViewportRevealEnhancements();
     addInteractiveMicroAnimations();
     addFocusMicroAnimations();
+    addButtonClickFeedback();
 });
 
 function runInitialRevealEnhancements() {
@@ -110,6 +117,53 @@ function addFocusMicroAnimations() {
         if (typeof element.onBlur === 'function') {
             element.onBlur(() => safeShow(element, 'fade', 130));
         }
+    });
+}
+
+function addButtonClickFeedback() {
+    const buttons = $w('Button');
+
+    if (!buttons || !buttons.length) {
+        return;
+    }
+
+    buttons.slice(0, BUTTON_FEEDBACK.limit).forEach((button) => {
+        if (!button || typeof button.onClick !== 'function') {
+            return;
+        }
+
+        let isLoading = false;
+
+        button.onClick(() => {
+            if (isLoading) {
+                return;
+            }
+
+            isLoading = true;
+            const originalLabel = typeof button.label === 'string' ? button.label : '';
+
+            if (typeof button.disable === 'function') {
+                button.disable();
+            }
+
+            if (typeof button.label === 'string') {
+                button.label = BUTTON_FEEDBACK.loadingLabel;
+            }
+
+            safeShow(button, 'puff', 140);
+
+            setTimeout(() => {
+                if (typeof button.label === 'string') {
+                    button.label = originalLabel;
+                }
+
+                if (typeof button.enable === 'function') {
+                    button.enable();
+                }
+
+                isLoading = false;
+            }, BUTTON_FEEDBACK.restoreDelayMs);
+        });
     });
 }
 
