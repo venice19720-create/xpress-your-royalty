@@ -47,6 +47,13 @@ const BUTTON_FEEDBACK = {
     pressedEffect: 'puff'
 };
 
+const HEADER_FOOTER_ENHANCEMENT = {
+    headerCount: 2,
+    footerCount: 2,
+    footerPulseDelay: 1200,
+    footerPulseStagger: 260
+};
+
 $w.onReady(function () {
     const profile = getExperienceProfile();
 
@@ -56,6 +63,7 @@ $w.onReady(function () {
     addFocusMicroAnimations(profile);
     addButtonClickFeedback(profile);
     addTrustSignals(profile);
+    enhanceHeaderAndFooter(profile);
 });
 
 function getExperienceProfile() {
@@ -221,6 +229,87 @@ function addTrustSignals(profile) {
         setTimeout(() => {
             safeShow(button, 'puff', scaleDuration(180, profile.durationMultiplier));
         }, pulseDelay);
+    });
+}
+
+function enhanceHeaderAndFooter(profile) {
+    const sections = $w('Section') || [];
+    const strips = $w('Strip') || [];
+    const headerCandidates = sections.slice(0, HEADER_FOOTER_ENHANCEMENT.headerCount)
+        .concat(strips.slice(0, HEADER_FOOTER_ENHANCEMENT.headerCount));
+    const footerCandidates = sections.slice(Math.max(0, sections.length - HEADER_FOOTER_ENHANCEMENT.footerCount))
+        .concat(strips.slice(Math.max(0, strips.length - HEADER_FOOTER_ENHANCEMENT.footerCount)));
+
+    applyRegionEnhancement(headerCandidates, {
+        revealEffect: 'float',
+        hoverInEffect: 'glide',
+        hoverOutEffect: 'fade',
+        revealDuration: scaleDuration(260, profile.durationMultiplier),
+        hoverDuration: scaleDuration(180, profile.durationMultiplier)
+    });
+
+    applyRegionEnhancement(footerCandidates, {
+        revealEffect: 'fade',
+        hoverInEffect: 'puff',
+        hoverOutEffect: 'fade',
+        revealDuration: scaleDuration(280, profile.durationMultiplier),
+        hoverDuration: scaleDuration(190, profile.durationMultiplier)
+    });
+
+    addFooterCtaPulse(profile);
+}
+
+function applyRegionEnhancement(elements, config) {
+    elements.forEach((element, index) => {
+        if (!element) {
+            return;
+        }
+
+        if (element.hidden) {
+            const delay = index * 120;
+            setTimeout(() => safeShow(element, config.revealEffect, config.revealDuration), delay);
+        }
+
+        if (typeof element.onViewportEnter === 'function') {
+            let hasAnimated = false;
+            element.onViewportEnter(() => {
+                if (hasAnimated) {
+                    return;
+                }
+
+                hasAnimated = true;
+                safeShow(element, config.revealEffect, config.revealDuration);
+            });
+        }
+
+        if (typeof element.onMouseIn === 'function') {
+            element.onMouseIn(() => safeShow(element, config.hoverInEffect, config.hoverDuration));
+        }
+
+        if (typeof element.onMouseOut === 'function') {
+            element.onMouseOut(() => safeShow(element, config.hoverOutEffect, Math.max(120, config.hoverDuration - 20)));
+        }
+    });
+}
+
+function addFooterCtaPulse(profile) {
+    const buttons = $w('Button');
+
+    if (!buttons || !buttons.length) {
+        return;
+    }
+
+    const footerButtons = buttons.slice(Math.max(0, buttons.length - 3));
+
+    footerButtons.forEach((button, index) => {
+        if (!button) {
+            return;
+        }
+
+        const delay = HEADER_FOOTER_ENHANCEMENT.footerPulseDelay + (index * HEADER_FOOTER_ENHANCEMENT.footerPulseStagger);
+        setTimeout(() => {
+            safeShow(button, 'puff', scaleDuration(170, profile.durationMultiplier));
+        }, delay);
     });
 }
 
