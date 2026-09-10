@@ -1,103 +1,64 @@
-// API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+// Site-wide content and conversion upgrades for Xpress Your Royalty.
+// Avoid global decorative animations so pages remain stable and readable.
 
-const REVEAL_GROUPS = [
-    { selector: 'Strip', effectName: 'fade', duration: 360, delayStep: 80, limit: 8 },
-    { selector: 'Box', effectName: 'fade', duration: 320, delayStep: 60, limit: 12 },
-    { selector: 'Image', effectName: 'glide', duration: 360, delayStep: 50, limit: 12 },
-    { selector: 'Text', effectName: 'fade', duration: 260, delayStep: 30, limit: 24 },
-    { selector: 'Button', effectName: 'puff', duration: 240, delayStep: 35, limit: 12 }
-];
+const CLIENT_EMAIL = 'info@xpressyourroyalty.com';
+const LEGACY_EMAIL = 't.o.l.endeavors@gmail.com';
+const INQUIRY_URL = 'https://www.honeybook.com/widget/xpress_your_royalty_295315/cf_id/69330d82817cf30030275bf5';
 
-const VIEWPORT_GROUPS = [
-    { selector: 'Box', effectName: 'fade', duration: 280, limit: 16 },
-    { selector: 'Image', effectName: 'glide', duration: 320, limit: 16 },
-    { selector: 'Text', effectName: 'fade', duration: 220, limit: 28 }
-];
+const INQUIRY_LABELS = new Set([
+    'book now',
+    'book online',
+    'get started',
+    'request a quote',
+    'start your event inquiry'
+]);
 
 $w.onReady(function () {
-    runInitialRevealEnhancements();
-    runViewportRevealEnhancements();
-    addInteractiveMicroAnimations();
+    updateClientFacingEmail();
+    connectInquiryButtons();
 });
 
-function runInitialRevealEnhancements() {
-    REVEAL_GROUPS.forEach((group) => {
-        const elements = $w(group.selector);
-
-        if (!elements || !elements.length) {
+function updateClientFacingEmail() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') {
             return;
         }
 
-        elements.slice(0, group.limit).forEach((element, index) => {
-            if (!element.hidden) {
-                return;
-            }
-
-            const delayMs = index * group.delayStep;
-            setTimeout(() => safeShow(element, group.effectName, group.duration), delayMs);
-        });
+        if (element.text.toLowerCase().includes(LEGACY_EMAIL)) {
+            element.text = element.text.replace(new RegExp(LEGACY_EMAIL, 'gi'), CLIENT_EMAIL);
+        }
     });
 }
 
-function runViewportRevealEnhancements() {
-    VIEWPORT_GROUPS.forEach((group) => {
-        const elements = $w(group.selector);
-
-        if (!elements || !elements.length) {
+function connectInquiryButtons() {
+    getElements('Button').forEach((button) => {
+        if (!button || typeof button.label !== 'string') {
             return;
         }
 
-        elements.slice(0, group.limit).forEach((element) => {
-            if (!element || typeof element.onViewportEnter !== 'function') {
-                return;
-            }
+        const normalizedLabel = button.label.trim().toLowerCase();
+        if (!INQUIRY_LABELS.has(normalizedLabel)) {
+            return;
+        }
 
-            let hasAnimated = false;
-
-            element.onViewportEnter(() => {
-                if (hasAnimated) {
-                    return;
-                }
-
-                hasAnimated = true;
-                safeShow(element, group.effectName, group.duration);
-            });
-        });
+        button.label = 'Start Your Event Inquiry';
+        button.link = INQUIRY_URL;
+        button.target = '_blank';
+        setAriaLabel(button, 'Start your event inquiry with Xpress Your Royalty');
     });
 }
 
-function addInteractiveMicroAnimations() {
-    addHoverAnimation('Button', 'puff', 160, 20);
-    addHoverAnimation('Image', 'glide', 190, 20);
-    addHoverAnimation('Box', 'fade', 170, 20);
-}
-
-function addHoverAnimation(selector, effectName, duration, limit) {
-    const elements = $w(selector);
-
-    if (!elements || !elements.length) {
-        return;
+function setAriaLabel(element, label) {
+    if (element.accessibility) {
+        element.accessibility.ariaLabel = label;
     }
-
-    elements.slice(0, limit).forEach((element) => {
-        if (!element || typeof element.onMouseIn !== 'function') {
-            return;
-        }
-
-        element.onMouseIn(() => {
-            safeShow(element, effectName, duration);
-        });
-    });
 }
 
-function safeShow(element, effectName, duration) {
-    if (!element || typeof element.show !== 'function') {
-        return;
-    }
-
+function getElements(selector) {
     try {
-        element.show(effectName, { duration });
+        const elements = $w(selector);
+        return elements && typeof elements.forEach === 'function' ? elements : [];
     } catch (error) {
-        element.show();
+        return [];
     }
 }
