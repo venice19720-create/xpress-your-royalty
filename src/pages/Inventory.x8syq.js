@@ -10,11 +10,66 @@ const RENTAL_CATEGORY_COPY = [
 ];
 
 $w.onReady(function () {
+    hideComingSoonThroneSection();
     refineRentalCopy();
     strengthenRentalDecisionPath();
     applyCategoryAccessibility();
     connectInquiryButtons();
 });
+
+function hideComingSoonThroneSection() {
+    let placeholderFound = false;
+
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
+
+        const text = normalize(element.text);
+        if (text === 'coming soon' ||
+            text.includes('coming soon in purple background and gold text') ||
+            (text.includes('throne chairs') && text.includes('specialty seating'))) {
+            placeholderFound = true;
+            safeCollapse(element);
+        }
+    });
+
+    getElements('Image').forEach((element) => {
+        if (!element) return;
+
+        const alt = typeof element.alt === 'string' ? normalize(element.alt) : '';
+        if (alt.includes('coming soon')) {
+            placeholderFound = true;
+            safeCollapse(element);
+        }
+    });
+
+    getElements('Gallery').forEach((gallery) => {
+        if (!gallery || !Array.isArray(gallery.items)) return;
+
+        const hasComingSoonItem = gallery.items.some((item) => {
+            const title = normalize(item && item.title ? item.title : '');
+            const description = normalize(item && item.description ? item.description : '');
+            return title.includes('coming soon') || description.includes('coming soon');
+        });
+
+        if (hasComingSoonItem) {
+            placeholderFound = true;
+            safeCollapse(gallery);
+        }
+    });
+
+    // The legacy inventory page had a second quote button attached to the
+    // unfinished throne-chair block. Collapse that duplicate only when the
+    // Coming Soon placeholder was actually detected.
+    if (placeholderFound) {
+        const legacyQuoteButtons = getElements('Button').filter((button) => {
+            return button && typeof button.label === 'string' && normalize(button.label) === 'request a quote';
+        });
+
+        if (legacyQuoteButtons.length > 1) {
+            safeCollapse(legacyQuoteButtons[legacyQuoteButtons.length - 1]);
+        }
+    }
+}
 
 function refineRentalCopy() {
     getElements('Text').forEach((element) => {
@@ -28,12 +83,12 @@ function refineRentalCopy() {
         }
 
         if (text === 'coming soon') {
-            element.text = 'Curated rental categories are available for qualifying events. Availability varies by event date, quantity, delivery requirements, and contracted scope.';
+            safeCollapse(element);
             return;
         }
 
         if (text.includes('throne chairs') && text.includes('specialty seating')) {
-            element.text = 'Specialty Seating & Statement Pieces';
+            safeCollapse(element);
             return;
         }
 
@@ -100,6 +155,12 @@ function connectInquiryButtons() {
             setAriaLabel(button, 'Check rental availability with Xpress Your Royalty');
         }
     });
+}
+
+function safeCollapse(element) {
+    if (element && typeof element.collapse === 'function') {
+        element.collapse();
+    }
 }
 
 function setAriaLabel(element, label) {
