@@ -34,6 +34,16 @@ $w.onReady(function () {
 
         if (text.includes('backdrops') && text.includes('drapes')) {
             element.text = 'Draping & Backdrop Elements';
+            return;
+        }
+
+        if (text.includes('pickup') && text.includes('rental')) {
+            element.text = 'Rental service is delivery-focused. Client pickup is not available. Final delivery, setup, return, access, and timing requirements are confirmed in the signed agreement.';
+            return;
+        }
+
+        if (text.includes('tables') && text.includes('chairs') && text.includes('available') && text.length > 55) {
+            element.text = 'Tables, chairs, linens, games, AV and event equipment, draping elements, and specialty additions are available based on quantity, event date, delivery logistics, and contracted scope.';
         }
     });
 
@@ -51,7 +61,7 @@ $w.onReady(function () {
         }
 
         const label = normalize(button.label);
-        if (['book now', 'get started', 'request a quote', 'contact us'].includes(label)) {
+        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation'].includes(label)) {
             button.label = 'Start Your Event Inquiry';
             button.link = INQUIRY_URL;
             button.target = '_blank';
