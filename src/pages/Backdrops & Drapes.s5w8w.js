@@ -14,12 +14,17 @@ $w.onReady(function () {
         }
 
         if (text.includes('backdrops') && text.includes('drapes') && text.length > 40) {
-            element.text = 'Create a focal point guests remember. Xpress Your Royalty designs custom draping and backdrop experiences for celebrations, corporate and community events, intimate weddings, stages, photo moments, sweetheart areas, and other statement spaces.';
+            element.text = 'Create a focal point guests remember. Xpress Your Royalty designs custom draping and backdrop experiences for social celebrations, corporate and community events, intimate weddings, stages, photo moments, sweetheart areas, and other statement spaces.';
             return;
         }
 
         if (text === 'coming soon') {
             element.text = 'Signature draping looks, layered fabric, statement backdrops, and custom color combinations are available based on your venue and event scope.';
+            return;
+        }
+
+        if (text.includes('balloon') && text.includes('backdrop') && text.length > 35) {
+            element.text = 'Layered fabric, statement backdrops, and coordinated focal-area styling are selected to complement your event colors, venue, and desired atmosphere.';
         }
     });
 
@@ -29,7 +34,7 @@ $w.onReady(function () {
         }
 
         const label = normalize(button.label);
-        if (['book now', 'get started', 'request a quote', 'contact us'].includes(label)) {
+        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation'].includes(label)) {
             button.label = 'Start Your Event Inquiry';
             button.link = INQUIRY_URL;
             button.target = '_blank';
