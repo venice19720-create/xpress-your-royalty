@@ -10,10 +10,15 @@ const RENTAL_CATEGORY_COPY = [
 ];
 
 $w.onReady(function () {
+    refineRentalCopy();
+    strengthenRentalDecisionPath();
+    applyCategoryAccessibility();
+    connectInquiryButtons();
+});
+
+function refineRentalCopy() {
     getElements('Text').forEach((element) => {
-        if (!element || typeof element.text !== 'string') {
-            return;
-        }
+        if (!element || typeof element.text !== 'string') return;
 
         const text = normalize(element.text);
 
@@ -46,34 +51,59 @@ $w.onReady(function () {
             element.text = 'Tables, chairs, linens, games, AV and event equipment, draping elements, and specialty additions are available based on quantity, event date, delivery logistics, and contracted scope.';
         }
     });
+}
 
-    const textElements = getElements('Text');
-    RENTAL_CATEGORY_COPY.forEach((category) => {
-        const match = textElements.find((element) => element && typeof element.text === 'string' && normalize(element.text) === normalize(category));
-        if (match && match.accessibility) {
-            match.accessibility.ariaLabel = category;
-        }
-    });
+function strengthenRentalDecisionPath() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
 
-    getElements('Button').forEach((button) => {
-        if (!button || typeof button.label !== 'string') {
+        const text = normalize(element.text);
+
+        if (text.includes('rental needs') || text.includes('what do you need')) {
+            element.text = 'For the fastest rental review, share your event date, venue, guest count, requested items and quantities, setup location or floor, delivery window, and any styling or setup support you need.';
             return;
         }
 
-        const label = normalize(button.label);
-        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation'].includes(label)) {
-            button.label = 'Start Your Event Inquiry';
-            button.link = INQUIRY_URL;
-            button.target = '_blank';
-            setAriaLabel(button, 'Start your rental inquiry with Xpress Your Royalty');
+        if (text.includes('availability') && text.includes('first come')) {
+            element.text = 'Rental availability is date- and quantity-specific. Your requested items are confirmed only after scope, logistics, agreement, and required payment are complete.';
+            return;
+        }
+
+        if (text.includes('delivery') && text.includes('fees') && text.length > 45) {
+            element.text = 'Delivery and logistics are quoted based on location, access, quantity, timing, setup needs, and return requirements. First-floor service is standard unless otherwise agreed in writing.';
+            return;
+        }
+
+        if (text.includes('contact us') && text.includes('rental')) {
+            element.text = 'Tell us what you need and where it is going. We’ll review availability, logistics, and the best next step for your event.';
         }
     });
-});
+}
+
+function applyCategoryAccessibility() {
+    const textElements = getElements('Text');
+    RENTAL_CATEGORY_COPY.forEach((category) => {
+        const match = textElements.find((element) => element && typeof element.text === 'string' && normalize(element.text) === normalize(category));
+        if (match && match.accessibility) match.accessibility.ariaLabel = category;
+    });
+}
+
+function connectInquiryButtons() {
+    getElements('Button').forEach((button) => {
+        if (!button || typeof button.label !== 'string') return;
+
+        const label = normalize(button.label);
+        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation', 'check availability', 'start your event inquiry'].includes(label)) {
+            button.label = 'Check Rental Availability';
+            button.link = INQUIRY_URL;
+            button.target = '_blank';
+            setAriaLabel(button, 'Check rental availability with Xpress Your Royalty');
+        }
+    });
+}
 
 function setAriaLabel(element, label) {
-    if (element.accessibility) {
-        element.accessibility.ariaLabel = label;
-    }
+    if (element.accessibility) element.accessibility.ariaLabel = label;
 }
 
 function normalize(value) {
