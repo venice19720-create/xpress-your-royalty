@@ -36,6 +36,7 @@ const COPY_REPLACEMENTS = new Map([
 ]);
 
 $w.onReady(function () {
+    collapsePlaceholderContent();
     applyLiveHomepageHotfix();
     refreshHomepagePositioning();
     refreshHomepageContent();
@@ -43,6 +44,26 @@ $w.onReady(function () {
     refreshHomepageCallsToAction();
     removeUnverifiedTestimonial();
 });
+
+function collapsePlaceholderContent() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
+        const text = normalize(element.text);
+
+        if (text === 'coming soon' || text === 'placeholder' || text === 'sample text') {
+            safeCollapse(element);
+        }
+    });
+
+    getElements('Image').forEach((element) => {
+        if (!element) return;
+        const alt = typeof element.alt === 'string' ? normalize(element.alt) : '';
+
+        if (alt.includes('coming soon') || alt.includes('placeholder')) {
+            safeCollapse(element);
+        }
+    });
+}
 
 function applyLiveHomepageHotfix() {
     setText('#comp-m7opvstb14', APPROVED_SERVICE_LINE);
@@ -199,6 +220,8 @@ function refreshHomepageCallsToAction() {
 }
 
 function removeUnverifiedTestimonial() {
+    let removedUnverifiedProof = false;
+
     getElements('Text').forEach((element) => {
         if (!element || typeof element.text !== 'string') return;
 
@@ -206,10 +229,22 @@ function removeUnverifiedTestimonial() {
         const isUnverifiedAttribution = text.includes('emily & michael') && text.includes('newlywed');
         const isUnverifiedQuote = text.includes('made our wedding day truly magical') && text.includes('seamless timeline');
 
-        if ((isUnverifiedAttribution || isUnverifiedQuote) && typeof element.collapse === 'function') {
-            element.collapse();
+        if (isUnverifiedAttribution || isUnverifiedQuote) {
+            removedUnverifiedProof = true;
+            safeCollapse(element);
         }
     });
+
+    if (removedUnverifiedProof) {
+        getElements('Text').forEach((element) => {
+            if (!element || typeof element.text !== 'string') return;
+            const text = normalize(element.text);
+
+            if (['client experiences', 'testimonials', 'what our clients say'].includes(text)) {
+                safeCollapse(element);
+            }
+        });
+    }
 }
 
 function configureInquiryButton(button) {
@@ -217,6 +252,12 @@ function configureInquiryButton(button) {
     button.link = INQUIRY_URL;
     button.target = '_blank';
     setAriaLabel(button, 'Start your event inquiry with Xpress Your Royalty');
+}
+
+function safeCollapse(element) {
+    if (element && typeof element.collapse === 'function') {
+        element.collapse();
+    }
 }
 
 function setText(selector, value) {
