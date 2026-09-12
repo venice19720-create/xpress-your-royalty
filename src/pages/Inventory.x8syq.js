@@ -9,6 +9,11 @@ const RENTAL_CATEGORY_COPY = [
     'Specialty Décor & Add-ons'
 ];
 
+const LEGACY_THRONE_COMPONENT_IDS = [
+    '#comp-mkj823nw',
+    '#comp-mkj85rl9'
+];
+
 $w.onReady(function () {
     hideComingSoonThroneSection();
     refineRentalCopy();
@@ -19,6 +24,21 @@ $w.onReady(function () {
 
 function hideComingSoonThroneSection() {
     let placeholderFound = false;
+
+    // These are the two legacy Inventory-page components previously flagged by
+    // the Wix accessibility scan. Collapse them directly so the unfinished
+    // throne-chair block cannot remain visible even if its text or alt text changes.
+    LEGACY_THRONE_COMPONENT_IDS.forEach((selector) => {
+        try {
+            const element = $w(selector);
+            if (element) {
+                placeholderFound = true;
+                safeCollapse(element);
+            }
+        } catch (error) {
+            // Keep the page running if Wix later removes or renames the element.
+        }
+    });
 
     getElements('Text').forEach((element) => {
         if (!element || typeof element.text !== 'string') return;
