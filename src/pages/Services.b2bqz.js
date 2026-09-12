@@ -1,8 +1,21 @@
 const INQUIRY_URL = 'https://www.honeybook.com/widget/xpress_your_royalty_295315/cf_id/69330d82817cf30030275bf5';
-const PAGE_HEADING = 'Event Design, Décor, Draping & Rentals';
+const PAGE_HEADING = 'Event Design, Draping, Décor & Rentals';
+
+const SERVICE_COPY = new Map([
+    ['services', PAGE_HEADING],
+    ['our services', PAGE_HEADING],
+    ['what we offer', 'Signature Services'],
+    ['event planning', 'Event Design & Décor'],
+    ['elegant styling', 'Designed Around Your Vision'],
+    ['decor and design', 'Draping & Backdrops'],
+    ['décor and design', 'Draping & Backdrops'],
+    ['personalized touch', 'Transform the Room. Frame the Moment.'],
+    ['balloon garlands and arches', 'Rentals & Event Support'],
+    ['balloon garlands & arches', 'Rentals & Event Support'],
+    ['whimsical charm', 'The Pieces That Bring It Together']
+]);
 
 $w.onReady(function () {
-    replaceHeading(['services', 'our services'], PAGE_HEADING);
     refineServiceCopy();
     connectInquiryButtons();
 });
@@ -15,18 +28,32 @@ function refineServiceCopy() {
 
         const text = normalize(element.text);
 
-        if (text === 'event décor & design' || text === 'event decor & design') {
-            element.text = 'Event Design & Décor';
+        if (SERVICE_COPY.has(text)) {
+            element.text = SERVICE_COPY.get(text);
             return;
         }
 
-        if (text === 'balloon garlands & backdrops' || text === 'balloon garlands and backdrops') {
-            element.text = 'Draping & Backdrops';
+        if (text.includes('dedicated to creating unforgettable events') &&
+            text.includes('balloon garlands')) {
+            element.text = 'Xpress Your Royalty creates polished event environments through thoughtful design, custom draping and backdrops, décor, curated rentals, and clearly defined setup support. We serve social, corporate, community, milestone, and intimate wedding events across Delaware, Pennsylvania, New Jersey, and Maryland.';
             return;
         }
 
-        if (text === 'event planning & setup support' || text === 'event planning and setup support') {
-            element.text = 'Rentals & Event Support';
+        if (text.includes('personalized experiences for our clients') &&
+            text.includes('elegant, professional')) {
+            element.text = 'Cohesive styling, focal areas, table details, and finishing touches are developed around your vision, venue, priorities, and guest experience.';
+            return;
+        }
+
+        if (text.includes('our decor and design services are tailored') ||
+            text.includes('our décor and design services are tailored')) {
+            element.text = 'Custom draping and backdrop installations create intentional focal points for stages, ceremonies, sweetheart areas, photo moments, corporate presentations, and statement spaces.';
+            return;
+        }
+
+        if (text.includes('add a touch of whimsy and charm') &&
+            text.includes('balloon garlands')) {
+            element.text = 'Tables, chairs, linens, games, AV and event equipment, backdrop elements, specialty décor, delivery, and selected setup or breakdown support are available based on your event scope.';
             return;
         }
 
@@ -42,23 +69,8 @@ function refineServiceCopy() {
 
         if (text.includes('professional support including décor planning')) {
             element.text = 'Curated rentals plus clearly defined delivery, setup, styling, and breakdown support for qualifying events.';
-            return;
-        }
-
-        if (text.includes('event planning') && text.includes('balloon garlands') && text.length > 50) {
-            element.text = 'Xpress Your Royalty provides event design and décor, custom draping and backdrops, curated rentals, and selected event support for social celebrations, corporate and community events, milestone occasions, and intimate weddings.';
         }
     });
-}
-
-function replaceHeading(matches, replacement) {
-    const heading = getElements('Text').find((element) =>
-        element && typeof element.text === 'string' && matches.includes(normalize(element.text))
-    );
-
-    if (heading) {
-        heading.text = replacement;
-    }
 }
 
 function connectInquiryButtons() {
@@ -67,7 +79,7 @@ function connectInquiryButtons() {
             return;
         }
 
-        if (['book now', 'get started', 'request a quote', 'contact us'].includes(normalize(button.label))) {
+        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation'].includes(normalize(button.label))) {
             button.label = 'Start Your Event Inquiry';
             button.link = INQUIRY_URL;
             button.target = '_blank';
