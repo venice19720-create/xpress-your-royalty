@@ -1,10 +1,14 @@
 const INQUIRY_URL = 'https://www.honeybook.com/widget/xpress_your_royalty_295315/cf_id/69330d82817cf30030275bf5';
 
 $w.onReady(function () {
+    refineDrapingCopy();
+    strengthenDrapingDecisionPath();
+    connectInquiryButtons();
+});
+
+function refineDrapingCopy() {
     getElements('Text').forEach((element) => {
-        if (!element || typeof element.text !== 'string') {
-            return;
-        }
+        if (!element || typeof element.text !== 'string') return;
 
         const text = normalize(element.text);
 
@@ -27,26 +31,46 @@ $w.onReady(function () {
             element.text = 'Layered fabric, statement backdrops, and coordinated focal-area styling are selected to complement your event colors, venue, and desired atmosphere.';
         }
     });
+}
 
-    getElements('Button').forEach((button) => {
-        if (!button || typeof button.label !== 'string') {
+function strengthenDrapingDecisionPath() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
+
+        const text = normalize(element.text);
+
+        if (text.includes('custom backdrop') && text.includes('event')) {
+            element.text = 'Your draping scope is built around the venue, installation area, event style, dimensions, access requirements, timing, and desired level of impact.';
             return;
         }
 
+        if (text.includes('colors') && text.includes('fabric') && text.length > 45) {
+            element.text = 'Share your colors, inspiration, venue photos, installation dimensions if available, and the focal area you want to transform. We’ll use those details to recommend the right direction.';
+            return;
+        }
+
+        if (text.includes('contact us') && text.includes('backdrop')) {
+            element.text = 'Start your inquiry with the event date, venue, colors, inspiration, and the area you want transformed so we can confirm fit and availability.';
+        }
+    });
+}
+
+function connectInquiryButtons() {
+    getElements('Button').forEach((button) => {
+        if (!button || typeof button.label !== 'string') return;
+
         const label = normalize(button.label);
-        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation'].includes(label)) {
-            button.label = 'Start Your Event Inquiry';
+        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation', 'check availability', 'start your event inquiry'].includes(label)) {
+            button.label = 'Start Your Draping Inquiry';
             button.link = INQUIRY_URL;
             button.target = '_blank';
             setAriaLabel(button, 'Start your draping and backdrop inquiry with Xpress Your Royalty');
         }
     });
-});
+}
 
 function setAriaLabel(element, label) {
-    if (element.accessibility) {
-        element.accessibility.ariaLabel = label;
-    }
+    if (element.accessibility) element.accessibility.ariaLabel = label;
 }
 
 function normalize(value) {
