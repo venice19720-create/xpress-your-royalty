@@ -1,10 +1,29 @@
 const INQUIRY_URL = 'https://www.honeybook.com/widget/xpress_your_royalty_295315/cf_id/69330d82817cf30030275bf5';
 
 $w.onReady(function () {
+    collapsePlaceholderContent();
     refineContactCopy();
     strengthenInquiryExpectations();
     connectInquiryButtons();
 });
+
+function collapsePlaceholderContent() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
+        const text = normalize(element.text);
+        if (text === 'coming soon' || text === 'placeholder' || text === 'sample text') {
+            safeCollapse(element);
+        }
+    });
+
+    getElements('Image').forEach((element) => {
+        if (!element) return;
+        const alt = typeof element.alt === 'string' ? normalize(element.alt) : '';
+        if (alt.includes('coming soon') || alt.includes('placeholder')) {
+            safeCollapse(element);
+        }
+    });
+}
 
 function refineContactCopy() {
     getElements('Text').forEach((element) => {
@@ -77,6 +96,10 @@ function connectInquiryButtons() {
             setAriaLabel(button, 'Submit your event inquiry details');
         }
     });
+}
+
+function safeCollapse(element) {
+    if (element && typeof element.collapse === 'function') element.collapse();
 }
 
 function setAriaLabel(element, label) {
