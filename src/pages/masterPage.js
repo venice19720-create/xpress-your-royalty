@@ -1,4 +1,4 @@
-// Site-wide content and conversion upgrades for Xpress Your Royalty.
+// Site-wide conversion consistency for Xpress Your Royalty.
 // Keep motion restrained so pages remain stable, readable, and accessible.
 
 const CLIENT_EMAIL = 'info@xpressyourroyalty.com';
@@ -21,11 +21,10 @@ $w.onReady(function () {
 
 function updateClientFacingCopy() {
     getElements('Text').forEach((element) => {
-        if (!element || typeof element.text !== 'string') {
-            return;
-        }
+        if (!element || typeof element.text !== 'string') return;
 
         let updated = element.text;
+        const normalized = normalize(updated);
 
         if (updated.toLowerCase().includes(LEGACY_EMAIL)) {
             updated = updated.replace(new RegExp(LEGACY_EMAIL, 'gi'), CLIENT_EMAIL);
@@ -39,22 +38,24 @@ function updateClientFacingCopy() {
             updated = updated.replace(/express your royalty/gi, 'Xpress Your Royalty');
         }
 
-        if (updated !== element.text) {
-            element.text = updated;
+        if (normalized === 'serving pa, de & nj' || normalized === 'serving pa, de, nj') {
+            updated = 'Serving DE, PA, NJ & MD';
         }
+
+        if (normalized.includes('full service event planning') && normalized.length < 140) {
+            updated = 'Event Design • Draping & Backdrops • Décor • Rentals';
+        }
+
+        if (updated !== element.text) element.text = updated;
     });
 }
 
 function connectInquiryButtons() {
     getElements('Button').forEach((button) => {
-        if (!button || typeof button.label !== 'string') {
-            return;
-        }
+        if (!button || typeof button.label !== 'string') return;
 
-        const normalizedLabel = button.label.trim().toLowerCase();
-        if (!INQUIRY_LABELS.has(normalizedLabel)) {
-            return;
-        }
+        const normalizedLabel = normalize(button.label);
+        if (!INQUIRY_LABELS.has(normalizedLabel)) return;
 
         button.label = 'Start Your Event Inquiry';
         button.link = INQUIRY_URL;
@@ -64,9 +65,11 @@ function connectInquiryButtons() {
 }
 
 function setAriaLabel(element, label) {
-    if (element.accessibility) {
-        element.accessibility.ariaLabel = label;
-    }
+    if (element.accessibility) element.accessibility.ariaLabel = label;
+}
+
+function normalize(value) {
+    return String(value).trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 function getElements(selector) {
