@@ -7,20 +7,46 @@ $w.onReady(function () {
         }
 
         const text = normalize(element.text);
+
         if (text === 'contact' || text === 'contact us') {
             element.text = 'Tell Us About Your Event';
+            return;
+        }
+
+        if (text.includes('we would love to hear from you') || text.includes('reach out to us')) {
+            element.text = 'Share your event type, date, venue or location, estimated guest count, services you are interested in, colors or style, and any inspiration or special requirements. The more detail you provide, the better we can recommend the right next step.';
+            return;
+        }
+
+        if (text.includes('t.o.l.endeavors@gmail.com')) {
+            element.text = element.text.replace(/t\.o\.l\.endeavors@gmail\.com/gi, 'info@xpressyourroyalty.com');
         }
     });
 
     getElements('Button').forEach((button) => {
-        if (button && typeof button.label === 'string' &&
-            ['book now', 'get started', 'request a quote'].includes(normalize(button.label))) {
-            button.label = 'Start Your Event Inquiry';
-            button.link = INQUIRY_URL;
-            button.target = '_blank';
+        if (!button || typeof button.label !== 'string') {
+            return;
+        }
+
+        const label = normalize(button.label);
+        if (['book now', 'get started', 'request a quote', 'contact us', 'submit'].includes(label)) {
+            if (label !== 'submit') {
+                button.label = 'Start Your Event Inquiry';
+                button.link = INQUIRY_URL;
+                button.target = '_blank';
+                setAriaLabel(button, 'Start your event inquiry with Xpress Your Royalty');
+            } else {
+                setAriaLabel(button, 'Submit your event inquiry details');
+            }
         }
     });
 });
+
+function setAriaLabel(element, label) {
+    if (element.accessibility) {
+        element.accessibility.ariaLabel = label;
+    }
+}
 
 function normalize(value) {
     return String(value).trim().toLowerCase().replace(/\s+/g, ' ');
