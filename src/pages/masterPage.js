@@ -15,9 +15,28 @@ const INQUIRY_LABELS = new Set([
 ]);
 
 $w.onReady(function () {
+    collapseUnfinishedPlaceholders();
     updateClientFacingCopy();
     connectInquiryButtons();
 });
+
+function collapseUnfinishedPlaceholders() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
+        const text = normalize(element.text);
+        if (text === 'coming soon' || text === 'placeholder' || text === 'sample text') {
+            safeCollapse(element);
+        }
+    });
+
+    getElements('Image').forEach((element) => {
+        if (!element) return;
+        const alt = typeof element.alt === 'string' ? normalize(element.alt) : '';
+        if (alt.includes('coming soon') || alt.includes('placeholder')) {
+            safeCollapse(element);
+        }
+    });
+}
 
 function updateClientFacingCopy() {
     getElements('Text').forEach((element) => {
@@ -62,6 +81,10 @@ function connectInquiryButtons() {
         button.target = '_blank';
         setAriaLabel(button, 'Start your event inquiry with Xpress Your Royalty');
     });
+}
+
+function safeCollapse(element) {
+    if (element && typeof element.collapse === 'function') element.collapse();
 }
 
 function setAriaLabel(element, label) {
