@@ -1,5 +1,5 @@
-// Homepage enterprise UX pass: positioning, service hierarchy, process clarity,
-// conversion consistency, and credibility cleanup without heavy animation.
+// Pass 2 conversion redesign: make the homepage guide visitors from
+// positioning -> services -> proof -> process -> inquiry with minimal friction.
 
 const INQUIRY_URL = 'https://www.honeybook.com/widget/xpress_your_royalty_295315/cf_id/69330d82817cf30030275bf5';
 const APPROVED_HERO_HEADLINE = 'Where Every Celebration Is Crowned With Elegance';
@@ -10,8 +10,11 @@ const COPY_REPLACEMENTS = new Map([
     ['about xpress your royalty', 'About Xpress Your Royalty'],
     ['our mission', 'Design With Purpose. Celebrate With Royalty.'],
     ['event décor & design', 'Event Design & Décor'],
+    ['event decor & design', 'Event Design & Décor'],
     ['balloon garlands & backdrops', 'Draping & Backdrops'],
+    ['balloon garlands and backdrops', 'Draping & Backdrops'],
     ['event planning & setup support', 'Rentals & Event Support'],
+    ['event planning and setup support', 'Rentals & Event Support'],
     ['initial consultation', 'Share Your Vision'],
     ['understanding your vision', 'Tell us about your event, priorities, venue, and style.'],
     ['detailed planning', 'Consultation & Scope'],
@@ -20,6 +23,14 @@ const COPY_REPLACEMENTS = new Map([
     ['bringing your event to life', 'We finalize details, rentals, measurements, sourcing, and setup plans.'],
     ['post-event evaluation', 'Setup, Styling & Breakdown'],
     ['ensuring success', 'We complete the contracted installation, styling, event support, and breakdown.'],
+    ['our process', 'Your Event Journey'],
+    ['how it works', 'Your Event Journey'],
+    ['why choose us', 'Why Xpress Your Royalty'],
+    ['why choose xpress your royalty', 'Why Xpress Your Royalty'],
+    ['testimonials', 'Client Experiences'],
+    ['what our clients say', 'Client Experiences'],
+    ['gallery', 'Recent Work'],
+    ['our gallery', 'Recent Work'],
     ['contact us', 'Ready to Bring Your Vision to Life?'],
     ['ready to start planning your event?', 'Tell us about your celebration and let’s create the right next step.']
 ]);
@@ -28,6 +39,7 @@ $w.onReady(function () {
     applyLiveHomepageHotfix();
     refreshHomepagePositioning();
     refreshHomepageContent();
+    strengthenTrustAndProof();
     refreshHomepageCallsToAction();
     removeUnverifiedTestimonial();
 });
@@ -49,9 +61,7 @@ function applyLiveHomepageHotfix() {
 
 function refreshHomepagePositioning() {
     getElements('Text').forEach((element) => {
-        if (!element || typeof element.text !== 'string') {
-            return;
-        }
+        if (!element || typeof element.text !== 'string') return;
 
         const copy = normalize(element.text);
 
@@ -86,9 +96,7 @@ function refreshHomepagePositioning() {
 
 function refreshHomepageContent() {
     getElements('Text').forEach((element) => {
-        if (!element || typeof element.text !== 'string') {
-            return;
-        }
+        if (!element || typeof element.text !== 'string') return;
 
         const text = normalize(element.text);
 
@@ -114,6 +122,38 @@ function refreshHomepageContent() {
 
         if (text.includes('tell us a little about your vision below')) {
             element.text = 'Share your event type, date, venue or location, estimated guest count, services of interest, colors or style, and any inspiration. We’ll follow up with availability and the best next step.';
+            return;
+        }
+
+        if (text.includes('every event is unique') && text.includes('special')) {
+            element.text = 'Every event starts with your vision. We help shape that vision into a polished, practical plan with clear scope, thoughtful design, and professional execution.';
+            return;
+        }
+
+        if (text.includes('we take pride') && text.includes('attention to detail')) {
+            element.text = 'Clients choose Xpress Your Royalty for intentional design, clear communication, insured business operations, dependable logistics, and hands-on attention to the details that shape the guest experience.';
+        }
+    });
+}
+
+function strengthenTrustAndProof() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
+
+        const text = normalize(element.text);
+
+        if (text === 'elegance meets excellence' || text === 'quality and elegance') {
+            element.text = 'Intentional Design. Professional Execution.';
+            return;
+        }
+
+        if (text.includes('serving delaware') && text.includes('new jersey')) {
+            element.text = 'Serving Delaware, Pennsylvania, New Jersey, and Maryland for qualifying events.';
+            return;
+        }
+
+        if (text.includes('book your consultation') && text.includes('today')) {
+            element.text = 'Ready to talk through your event? Start with a few details so we can confirm fit, availability, and the right next step.';
         }
     });
 }
@@ -123,42 +163,44 @@ function refreshHomepageCallsToAction() {
     let primaryInquiryAssigned = false;
 
     buttons.forEach((button) => {
-        if (!button || typeof button.label !== 'string') {
-            return;
-        }
+        if (!button || typeof button.label !== 'string') return;
 
         const label = normalize(button.label);
 
         if (!primaryInquiryAssigned &&
-            ['book now', 'book online', 'get started', 'request a quote', 'book your event consultation', 'contact us'].includes(label)) {
+            ['book now', 'book online', 'get started', 'request a quote', 'book your event consultation', 'contact us', 'start your event inquiry'].includes(label)) {
             configureInquiryButton(button);
             primaryInquiryAssigned = true;
             return;
         }
 
-        if (['request a quote', 'book your event consultation'].includes(label)) {
+        if (['request a quote', 'book your event consultation', 'start your event inquiry', 'check availability'].includes(label)) {
             configureInquiryButton(button);
             return;
         }
 
-        if (['view gallery', 'our gallery', 'portfolio'].includes(label)) {
+        if (['view gallery', 'our gallery', 'portfolio', 'view portfolio', 'view our work'].includes(label)) {
             button.label = 'Explore Our Work';
             setAriaLabel(button, 'Explore recent Xpress Your Royalty event work');
             return;
         }
 
-        if (label === 'learn more') {
+        if (['learn more', 'about us'].includes(label)) {
             button.label = 'Discover Xpress Your Royalty';
             setAriaLabel(button, 'Learn more about Xpress Your Royalty');
+            return;
+        }
+
+        if (['services', 'view services', 'our services'].includes(label)) {
+            button.label = 'Explore Our Services';
+            setAriaLabel(button, 'Explore Xpress Your Royalty event services');
         }
     });
 }
 
 function removeUnverifiedTestimonial() {
     getElements('Text').forEach((element) => {
-        if (!element || typeof element.text !== 'string') {
-            return;
-        }
+        if (!element || typeof element.text !== 'string') return;
 
         const text = normalize(element.text);
         const isUnverifiedAttribution = text.includes('emily & michael') && text.includes('newlywed');
@@ -180,9 +222,7 @@ function configureInquiryButton(button) {
 function setText(selector, value) {
     try {
         const element = $w(selector);
-        if (element && typeof element.text === 'string') {
-            element.text = value;
-        }
+        if (element && typeof element.text === 'string') element.text = value;
     } catch (error) {
         // Keep the rest of the homepage upgrade running if Wix removes an ID.
     }
@@ -191,19 +231,11 @@ function setText(selector, value) {
 function connectInquiryElement(selector) {
     try {
         const element = $w(selector);
-        if (!element) {
-            return;
-        }
+        if (!element) return;
 
-        if (typeof element.label === 'string') {
-            element.label = 'Start Your Event Inquiry';
-        }
-        if ('link' in element) {
-            element.link = INQUIRY_URL;
-        }
-        if ('target' in element) {
-            element.target = '_blank';
-        }
+        if (typeof element.label === 'string') element.label = 'Start Your Event Inquiry';
+        if ('link' in element) element.link = INQUIRY_URL;
+        if ('target' in element) element.target = '_blank';
         setAriaLabel(element, 'Start your event inquiry with Xpress Your Royalty');
     } catch (error) {
         // A missing or incompatible component must not break page rendering.
@@ -211,9 +243,7 @@ function connectInquiryElement(selector) {
 }
 
 function setAriaLabel(element, label) {
-    if (element.accessibility) {
-        element.accessibility.ariaLabel = label;
-    }
+    if (element.accessibility) element.accessibility.ariaLabel = label;
 }
 
 function normalize(value) {
