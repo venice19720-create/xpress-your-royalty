@@ -20,6 +20,11 @@ $w.onReady(function () {
 
         if (text.includes('t.o.l.endeavors@gmail.com')) {
             element.text = element.text.replace(/t\.o\.l\.endeavors@gmail\.com/gi, 'info@xpressyourroyalty.com');
+            return;
+        }
+
+        if (text.includes('serving') && text.includes('delaware') && text.includes('pennsylvania')) {
+            element.text = 'Serving Delaware, Pennsylvania, New Jersey, and Maryland based on event scope, logistics, and availability.';
         }
     });
 
@@ -29,15 +34,16 @@ $w.onReady(function () {
         }
 
         const label = normalize(button.label);
-        if (['book now', 'get started', 'request a quote', 'contact us', 'submit'].includes(label)) {
-            if (label !== 'submit') {
-                button.label = 'Start Your Event Inquiry';
-                button.link = INQUIRY_URL;
-                button.target = '_blank';
-                setAriaLabel(button, 'Start your event inquiry with Xpress Your Royalty');
-            } else {
-                setAriaLabel(button, 'Submit your event inquiry details');
-            }
+        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation'].includes(label)) {
+            button.label = 'Start Your Event Inquiry';
+            button.link = INQUIRY_URL;
+            button.target = '_blank';
+            setAriaLabel(button, 'Start your event inquiry with Xpress Your Royalty');
+            return;
+        }
+
+        if (label === 'submit') {
+            setAriaLabel(button, 'Submit your event inquiry details');
         }
     });
 });
