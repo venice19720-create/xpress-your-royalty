@@ -1,5 +1,5 @@
 // Site-wide content and conversion upgrades for Xpress Your Royalty.
-// Avoid global decorative animations so pages remain stable and readable.
+// Keep motion restrained so pages remain stable, readable, and accessible.
 
 const CLIENT_EMAIL = 'info@xpressyourroyalty.com';
 const LEGACY_EMAIL = 't.o.l.endeavors@gmail.com';
@@ -10,22 +10,37 @@ const INQUIRY_LABELS = new Set([
     'book online',
     'get started',
     'request a quote',
+    'book your event consultation',
     'start your event inquiry'
 ]);
 
 $w.onReady(function () {
-    updateClientFacingEmail();
+    updateClientFacingCopy();
     connectInquiryButtons();
 });
 
-function updateClientFacingEmail() {
+function updateClientFacingCopy() {
     getElements('Text').forEach((element) => {
         if (!element || typeof element.text !== 'string') {
             return;
         }
 
-        if (element.text.toLowerCase().includes(LEGACY_EMAIL)) {
-            element.text = element.text.replace(new RegExp(LEGACY_EMAIL, 'gi'), CLIENT_EMAIL);
+        let updated = element.text;
+
+        if (updated.toLowerCase().includes(LEGACY_EMAIL)) {
+            updated = updated.replace(new RegExp(LEGACY_EMAIL, 'gi'), CLIENT_EMAIL);
+        }
+
+        if (/©\s*2025/i.test(updated)) {
+            updated = updated.replace(/©\s*2025/gi, '© 2026');
+        }
+
+        if (/express your royalty/i.test(updated)) {
+            updated = updated.replace(/express your royalty/gi, 'Xpress Your Royalty');
+        }
+
+        if (updated !== element.text) {
+            element.text = updated;
         }
     });
 }
