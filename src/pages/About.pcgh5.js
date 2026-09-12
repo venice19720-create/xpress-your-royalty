@@ -1,10 +1,13 @@
 const INQUIRY_URL = 'https://www.honeybook.com/widget/xpress_your_royalty_295315/cf_id/69330d82817cf30030275bf5';
 
 $w.onReady(function () {
+    strengthenAboutCopy();
+    connectInquiryButtons();
+});
+
+function strengthenAboutCopy() {
     getElements('Text').forEach((element) => {
-        if (!element || typeof element.text !== 'string') {
-            return;
-        }
+        if (!element || typeof element.text !== 'string') return;
 
         const text = normalize(element.text);
 
@@ -30,28 +33,46 @@ $w.onReady(function () {
 
         if (text.includes('years of experience') && text.includes('team')) {
             element.text = 'Every event is approached with care, clear communication, and a practical eye for the details that shape the guest experience.';
-        }
-    });
-
-    getElements('Button').forEach((button) => {
-        if (!button || typeof button.label !== 'string') {
             return;
         }
 
+        if (text.includes('we believe every event') || text.includes('your vision is our priority')) {
+            element.text = 'Your vision sets the direction. Our role is to translate it into a polished, practical event experience with clear communication, thoughtful details, and professional execution.';
+            return;
+        }
+
+        if (text.includes('why choose') || text === 'our promise') {
+            element.text = 'What You Can Expect';
+            return;
+        }
+
+        if (text.includes('attention to detail') && text.includes('quality')) {
+            element.text = 'Clear scope, intentional design, dependable logistics, insured business operations, and hands-on attention to the details that matter most.';
+            return;
+        }
+
+        if (text.includes('delaware') && text.includes('pennsylvania') && text.includes('new jersey')) {
+            element.text = 'Serving Delaware, Pennsylvania, New Jersey, and Maryland for qualifying events based on scope, logistics, and availability.';
+        }
+    });
+}
+
+function connectInquiryButtons() {
+    getElements('Button').forEach((button) => {
+        if (!button || typeof button.label !== 'string') return;
+
         const label = normalize(button.label);
-        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation'].includes(label)) {
+        if (['book now', 'get started', 'request a quote', 'contact us', 'book your event consultation', 'start your event inquiry'].includes(label)) {
             button.label = 'Start Your Event Inquiry';
             button.link = INQUIRY_URL;
             button.target = '_blank';
             setAriaLabel(button, 'Start your event inquiry with Xpress Your Royalty');
         }
     });
-});
+}
 
 function setAriaLabel(element, label) {
-    if (element.accessibility) {
-        element.accessibility.ariaLabel = label;
-    }
+    if (element.accessibility) element.accessibility.ariaLabel = label;
 }
 
 function normalize(value) {
