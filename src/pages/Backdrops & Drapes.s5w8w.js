@@ -1,10 +1,39 @@
 const INQUIRY_URL = 'https://www.honeybook.com/widget/xpress_your_royalty_295315/cf_id/69330d82817cf30030275bf5';
 
 $w.onReady(function () {
+    collapsePlaceholderContent();
     refineDrapingCopy();
     strengthenDrapingDecisionPath();
     connectInquiryButtons();
 });
+
+function collapsePlaceholderContent() {
+    getElements('Text').forEach((element) => {
+        if (!element || typeof element.text !== 'string') return;
+        const text = normalize(element.text);
+        if (text === 'coming soon' || text === 'placeholder' || text === 'sample text') {
+            safeCollapse(element);
+        }
+    });
+
+    getElements('Image').forEach((element) => {
+        if (!element) return;
+        const alt = typeof element.alt === 'string' ? normalize(element.alt) : '';
+        if (alt.includes('coming soon') || alt.includes('placeholder')) {
+            safeCollapse(element);
+        }
+    });
+
+    getElements('Gallery').forEach((gallery) => {
+        if (!gallery || !Array.isArray(gallery.items)) return;
+        const hasPlaceholder = gallery.items.some((item) => {
+            const title = normalize(item && item.title ? item.title : '');
+            const description = normalize(item && item.description ? item.description : '');
+            return title.includes('coming soon') || description.includes('coming soon') || title.includes('placeholder');
+        });
+        if (hasPlaceholder) safeCollapse(gallery);
+    });
+}
 
 function refineDrapingCopy() {
     getElements('Text').forEach((element) => {
@@ -23,7 +52,7 @@ function refineDrapingCopy() {
         }
 
         if (text === 'coming soon') {
-            element.text = 'Signature draping looks, layered fabric, statement backdrops, and custom color combinations are available based on your venue and event scope.';
+            safeCollapse(element);
             return;
         }
 
@@ -67,6 +96,10 @@ function connectInquiryButtons() {
             setAriaLabel(button, 'Start your draping and backdrop inquiry with Xpress Your Royalty');
         }
     });
+}
+
+function safeCollapse(element) {
+    if (element && typeof element.collapse === 'function') element.collapse();
 }
 
 function setAriaLabel(element, label) {
